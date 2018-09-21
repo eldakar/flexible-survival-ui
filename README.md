@@ -26,12 +26,11 @@ At the bottom of the window is a status bar.
 ![Screenshot of left status bar](screenshots/bar_left.png)
 ![Screenshot of right status bar](screenshots/bar_right.png)
 
-The left side shows your character's name, sex[^1], and in-character time, while the right side shows your local time, date, and hostname.
-
-[^1]: not visible in screenshot as it's broken at present
+The left side shows your character's name, sex (although not currently due to being broken), and in-character time, while the right side shows your local time, date, and hostname.
 
 
 ## Dependencies
+  - a terminal that supports 256-colour or truecolour mode, and unicode fonts
   - tintin++
   - tmux
   - bash
@@ -64,11 +63,11 @@ then edit the `config.json` file and fill in your character name, password, and 
 
 Please note that as the config file contains your password in plain text, you should take steps to ensure the file is secure. I recommend `chmod 600 ~/fs_mud/config.json` as a minimum to ensure only your user can access it.
 
-There are other settings in the status/weather section that may be of interest[^2]:
+There are other settings in the status/weather section that may be of interest:
   - `units` can be set to metric or imperial to show the temperature and windspeed in degrees celcius and metres per second, or degrees Farenheit and miles per hour, respectively.
   - `precise_wind` can be true or false, where true means to show the wind speed and direction numerically rather than just a text based description.
   - `temperature_threshold_hot` and `temperature_threshold_cold` are the maximum and minimum temperatures your character feels are comfortable. For roleplaying purposes, the status pane will display temperatures inside this range in green to indicate comfortable, temperatures above it in red to indicate your character is too hot and may be sweating or similar, and temperatures below it in blue to indicate your character is cold and may be shivering, etc.
   
-[^2]: These settings are purely to assist in your roleplaying - it does not affect your character in any way, and it remains up to you how your character responds to the environment.
+These settings are purely to assist in your roleplaying - it does not affect your character in any way, and it remains up to you how your character responds to the environment.
 
 If all goes well, you should now be able to run the `~/fs_mud/flexible_survival` script and connect to the server as your configured character. 
