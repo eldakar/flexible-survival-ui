@@ -1,0 +1,22 @@
+{
+	"tmux": {
+		"session_name": "Flexible Survival",
+		"theme": "tmux_theme"
+	},
+
+	"fs": {
+		"character": "CHARACTER NAME HERE",
+		"password": "PASSWORD HERE",
+		"chat_channels": "Public Theme Pickup Newbie Badges Auction Lfg Casual Rp"
+	},
+	
+	"status": {
+		"weather": {
+			"api_key": "OPENWEATHERMAP API KEY HERE",
+			"units": "metric",
+			"precise_wind": "false",
+			"temperature_threshold_hot": "30",
+			"temperature_threshold_cold": "8"
+		}
+	}
+}

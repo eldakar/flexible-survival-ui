@@ -1,0 +1,275 @@
+#NOP {tintin++ script};
+#NOP {};
+#NOP { flexiblesurvival - A script for starting tintin++ sessions with a nice UI for flexiblesurvival.com };
+#NOP { Copyright (C) 2018  Inutt - https://gitlab.com/inutt/flexible-survival-ui };
+#NOP {                                                                           };
+#NOP { This program is free software: you can redistribute it and/or modify      };
+#NOP { it under the terms of the GNU General Public License as published by      };
+#NOP { the Free Software Foundation, either version 3 of the License, or         };
+#NOP { (at your option) any later version.                                       };
+#NOP {                                                                           };
+#NOP { This program is distributed in the hope that it will be useful,           };
+#NOP { but WITHOUT ANY WARRANTY; without even the implied warranty of            };
+#NOP { MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             };
+#NOP { GNU General Public License for more details.                              };
+#NOP {                                                                           };
+#NOP { You should have received a copy of the GNU General Public License         };
+#NOP { along with this program.  If not, see <https://www.gnu.org/licenses/>.    };
+
+#CONFIG           {256 COLORS}  {ON}
+#CONFIG           {AUTO TAB}  {5000}
+#CONFIG           {BUFFER SIZE}  {20000}
+#CONFIG           {CHARSET}  {UTF-8}
+#CONFIG           {COLOR PATCH}  {OFF}
+#CONFIG           {COMMAND COLOR}  {<078>}
+#CONFIG           {COMMAND ECHO}  {ON}
+#CONFIG           {CONNECT RETRY}  {15}
+#CONFIG           {HISTORY SIZE}  {1000}
+#CONFIG           {LOG}  {RAW}
+#CONFIG           {PACKET PATCH}  {0.00}
+#CONFIG           {REPEAT CHAR}  {!}
+#CONFIG           {REPEAT ENTER}  {OFF}
+#CONFIG           {SCROLL LOCK}  {ON}
+#CONFIG           {SPEEDWALK}  {OFF}
+#CONFIG           {TINTIN CHAR}  {#}
+#CONFIG           {VERBATIM}  {OFF}
+#CONFIG           {VERBATIM CHAR}  {\}
+#CONFIG           {VERBOSE}  {OFF}
+#CONFIG           {WORDWRAP}  {ON}
+
+#NOP {Basic ten compass directions};
+#PATHDIR          {n}   {s}  {1}
+#PATHDIR          {e}   {w}  {2}
+#PATHDIR          {s}   {n}  {4}
+#PATHDIR          {w}   {e}  {8}
+#PATHDIR          {u}   {d}  {16}
+#PATHDIR          {d}   {u}  {32}
+#PATHDIR          {ne}  {sw}  {3}
+#PATHDIR          {nw}  {se}  {9}
+#PATHDIR          {se}  {nw}  {6}
+#PATHDIR          {sw}  {ne}  {12}
+
+#NOP {Compound directions up+<direction>};
+#PATHDIR          {un}   {ds}  {17}
+#PATHDIR          {ue}   {dw}  {18}
+#PATHDIR          {us}   {dn}  {20}
+#PATHDIR          {uw}   {de}  {24}
+#PATHDIR          {une}  {dsw}  {19}
+#PATHDIR          {unw}  {dse}  {15}
+#PATHDIR          {use}  {dnw}  {22}
+#PATHDIR          {usw}  {dne}  {28}
+
+#NOP {Compound directions down+<direction>};
+#PATHDIR          {dn}   {us}  {33}
+#PATHDIR          {de}   {uw}  {34}
+#PATHDIR          {ds}   {un}  {36}
+#PATHDIR          {dw}   {ue}  {40}
+#PATHDIR          {dne}  {usw}  {35}
+#PATHDIR          {dnw}  {use}  {41}
+#PATHDIR          {dse}  {unw}  {38}
+#PATHDIR          {dsw}  {une}  {28}
+
+
+#NOP {Read in assorted variables passed from the main script and set some things up};
+#script {MAP_FILE} {echo "$data_dir/map_data"}; #var {MAP_FILE} {$MAP_FILE[1]};
+#script {LOG_FILE} {echo "$data_dir/session.log"}; #var {LOG_FILE} {$LOG_FILE[1]};
+#script {tmp} {echo $fs_chat_channels}; #var {tmp} {$tmp[1]}; #list {chat channel list} create $tmp;
+#script {USERNAME} {echo $fs_character}; #var {USERNAME} {$USERNAME[1]};
+#script {PASSWORD} {echo $fs_password}; #var {PASSWORD} {$PASSWORD[1]};
+#var {hazard level} {unknown};
+
+#gts #session map_pane localhost 4051;
+#gts #session chat_pane localhost 4052;
+
+
+#alias {load_map} {
+	#map create;
+	#map flag {mudfont} {on};
+	#map goto 1;
+	#map read $MAP_FILE;
+	#map return;
+};
+#alias {save_map} {
+	#map write $MAP_FILE;
+};
+#alias {update_map} {
+	#map map 64x30 mapvar v;
+	#map_pane #line substitute {var} #send {$mapvar};
+};
+
+
+#alias {mark here} {
+	#switch {"%2"} {
+		#case {"safe"} { #var {colour} {<afa>} };
+		#case {"normal"} { #var {colour} {} };
+		#case {"dangerous"} { #var {colour} {<faa>} };
+		#default { #showme {Can't mark as "%2", only safe|normal|dangerous; #return } };
+	};
+	#showme {Marked this location as %2};
+	#map set roomcolor {$colour};
+};
+
+
+#event {SESSION CONNECTED} {
+	#if {"%0" == "main_session"} {
+		#delay {2} {
+			#split;
+			#NOP {Braces can't be escaped using \ so have to be hex encoded (see #help escape for details), % can be escaped normally};
+			#NOP {If any of these characters appear in your password, you'll probably need to escape them appropriately in the config file};
+			connect $USERNAME $PASSWORD;
+			#NOP {Make sure the password can't be leaked later by accident};
+			#unvar $USERNAME;
+			#unvar $PASSWORD;
+			load_map;
+
+			#ticker {automapper save} {save_map} {60}; #NOP {Automatically save the map once a minute};
+			#system {perl "$app_dir/scripts/update_weather.pl"};                                   #NOP {Update the weather on connection};
+			#ticker {weather updates} {#system {perl "$app_dir/scripts/update_weather.pl"}} {300}; #NOP {...and then periodically        };
+			#script {create log file} {#system {touch $LOG_FILE}};
+			#log overwrite ${LOG_FILE};
+		};
+	};
+};
+
+#event {SESSION DISCONNECTED} {
+	#if {"%0" == "main_session"} {
+		save_map;
+		#map_pane #send +++EXIT+++;
+		#chat_pane #send +++EXIT+++;
+		#end {Automatically terminating due to disconnect};
+	};
+};
+
+
+#NOP {Intercept chat messages and redirect to a separate pane};
+#alias {process_chat_message} {
+	#var {full message} {%1};
+	#var {last incoming chat channel} {%2};
+	#var {last incoming chat message} {%3};
+
+	#foreach {${chat channel list}[%*]} {tmp} {
+		#if {"${last incoming chat channel}" == "${tmp}"} {
+			#chat_pane #line sub {var} #send {${full message}\};
+			#line gag;
+			#break;
+		};
+	};
+};
+#NOP #action {~\e[1;37m[\e[{\w+}{.+}\e[{\w+}m]\e[0m {.+}} ;
+#NOP 	#showme "Got chat message for channel %1";
+#NOP 	#showme "Message reads: %2";
+#NOP	process_chat_message {%0} {%1} {%2};
+#NOP };
+#NOP #action {~^\e[1;37m[\e%+m%1\e%+m]\e[0m %2} {
+#action {~^\e[1;37m[\e%*m%1\e%*m]\e[0m %2} {
+	process_chat_message {%0} {%1} {%2};
+};
+#NOP #action {~^\e[1;37m[\e%+m\e%+m%1\e%+m]\e[0m %2} {
+#NOP process_chat_message {%0} {%1} {%2};
+#NOP };
+
+action {^\<Flee\> %+ flees to the [%+]} {
+	#showme "+++ DEBUG: %1 fleeing successful to %2 +++";
+};
+
+
+#NOP {Mapping functions};
+
+#event {MAP ENTER ROOM} {
+	#var {just used a valid exit} {true};
+	update_map;
+};
+
+#action {~^\e%+m[%1]: %2\e%+m$} {
+	#NOP {Just entered a room, so parse the name and store.};
+	#NOP {Done separately from the MAP ENTER ROOM event as it has multiple lines to parse before adding it to the map};
+	#showme \n\n\n;
+	#var {room name} {%2};
+	#var {room area} {%1};
+	#var {grab room description} {true};
+	
+	#NOP {Only update the map data if we actually went through a valid exit.};
+	#NOP {Otherwise we'd end up overwriting room descriptions when moving with a command that isn't a known PATHDIR.};
+	#if {"${just used a valid exit}" == "true"} {
+		#var {just used a valid exit} {false};
+
+		#map set {roomarea} {${room area}};
+		#map set {roomname} {${room name}};
+	};
+	
+	#NOP {Update the UI};
+	#system {perl "$app_dir/scripts/update_status.pl" --area "${room area}" --room "${room name}"};
+};
+
+#action {~\e[0;37m--\e[0;36mContents of %1\e[0;37m--\e[0m\e[0m} {
+	#regex {%1} {^[${room area}]: ${room name}$} {
+		#NOP {Room description is complete, store and stop reading by removing the grab_room_description flag};
+		#var {grab room description} {false};
+
+		#NOP {Remove empty lines from the start and end of the description, and the last line that isn't part of it};
+		#list {room description} delete -1;
+		#while {"${room description}[1]" == "\e[0m%s\e[0m"} { #list {room description} delete 1; };
+		#while {"${room description}[-1]" == "\e[0m%s\e[0m"} { #list {room description} delete -1; };
+
+		#loop {1} {&{room description}[]} {i} {
+			#if {"${room description}[$i]" == "^%s"} { #list {room description} delete {i}; } { #break; };
+		};
+
+		#NOP {Convert the description array into a string};
+		#var {tmp} {${room description}[1]};
+		#loop {2} {&{room description}[]} {i} {
+			#var {tmp} {${tmp}\n${room description}[$i]};
+		};
+
+		#NOP {Store the description and clear the array for the next room};
+		#map set {roomdesc} {$tmp};
+		#list {room description} clear;
+	} {
+		#NOP {Comment to stop tintin going crazy};
+	};
+} {
+	#NOP {Comment to stop tintin going crazy};
+};
+
+#action {^Your hazard monitor emits a%? %*. (+haz)} {
+	#if {"%2" == "soothing ding"} { #var {hazard level} {safe} } {
+		#if {"%2" == "cautionary chirp"} { #var {hazard level} {normal} } {
+			#if {"%2" == "alarming buzz"} { #var {hazard level} {dangerous} } {
+				#var {hazard level} {unknown};
+			};
+		};
+	};
+	
+	#system {perl "$app_dir/scripts/update_status.pl" --hazard "${hazard level}"};
+};
+
+#event {RECEIVED LINE} {
+	#var {received line} {%0};
+
+	#if {"${grab room description}" == "true" && &{room description}[] < 20} {
+		#list {room description} add {${received line}};
+	};
+
+	#NOP {Catch some common navigation errors and remove them from the map};
+	#regex {${received line}} {^{You can't go that way.|You can't go that way from here.|Please try again.|The door seems locked.}} {
+		#map undo;
+		update_map;
+	};
+};
+
+
+#NOP #NOP {Correct map location after getting defeated};
+#NOP #action {^You have been defeated!$} {
+#NOP 	#showme Resetting automapper location to default respawn point...;
+#NOP 	#map goto 1;
+#NOP 	update_map;
+#NOP };
+
+#event {PROGRAM TERMINATION} {
+	#system {$TMUX_CMD kill-session -t "$SESSION"};
+	#NOP #system {kill $(cat "$data_dir/status_monitor.pid")};
+};
+
+
+#NOP {Start the session};
+#ssl {main_session} {flexiblesurvival.com} {2002};

@@ -1,0 +1,5 @@
+# Store the empty directory in git, but not the contents as they're
+# just temporary data
+
+*
+!.gitignore

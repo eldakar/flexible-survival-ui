@@ -1,0 +1,129 @@
+#!/bin/sh
+#
+# flexiblesurvival - A script for starting tintin++ sessions with a nice UI for flexiblesurvival.com
+# Copyright (C) 2018  Inutt - https://gitlab.com/inutt/flexible-survival-ui
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+set -o errexit -o pipefail -o nounset
+export COLORTERM='truecolor'
+
+export app_name='fs_mud' # Keep this consistent between scripts
+#export config_file="${XDG_CONFIG_HOME:-$HOME/.config}/$app_name/config.json"
+#export data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/$app_name"
+export app_dir="$(dirname "$(realpath $0)")"
+export config_file="${app_dir}/config.json"
+export data_dir="${app_dir}/character_data"
+
+# Max height is lines-1 as one line is reserved for the status bar
+max_width=$(tput cols)             #       chat
+max_height=$(($(tput lines) - 1))  # ------+-----------
+map_width=64                       # status|
+map_height=30                      # ------|   main
+chat_height=14                     #  map  |
+status_height=16                   #       |
+
+
+
+# Command line parsing from https://stackoverflow.com/a/29754866
+
+# Check we can parse command line options as expected
+! getopt --test > /dev/null
+if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
+    echo "Your system's 'getopt' command isn't supported by this script"
+    exit 1
+fi
+
+# Available options
+OPTIONS="c:d:"
+LONGOPTS="config-file:data-dir:"
+
+# -use ! and PIPESTATUS to get exit code with errexit set
+# -temporarily store output to be able to check for errors
+# -activate quoting/enhanced mode (e.g. by writing out “--options”)
+# -pass arguments only via   -- "$@"   to separate them correctly
+! PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@")
+if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
+    # e.g. return value is 1
+    #  then getopt has complained about wrong arguments to stdout
+    exit 2
+fi
+# read getopt’s output this way to handle the quoting right:
+eval set -- "$PARSED"
+
+# Parse the options
+while true; do
+    case "$1" in
+        -c|--config-file)
+            config_file="$2"
+            shift 2
+            ;;
+        -d|--data-dir)
+            data_dir="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Script error parsing argument '$1'"
+            exit 2;
+            ;;
+    esac
+done
+
+# Make paths absolute to avoid problems later
+config_file=$(realpath -s ${config_file})
+data_dir=$(realpath -s ${data_dir})
+
+
+# handle non-option arguments
+if [[ $# > 0 ]]; then
+    echo "$0: extra argument(s) '$@' supplied"
+    exit 3
+fi
+
+# Read in the config file, if it exists
+if [[ ! -r "${config_file}" ]]; then
+    echo "No configuration found (looking in ${config_file})"
+    exit 1
+else
+    CONFIG="$(cat "${config_file}")"
+    export fs_tmux_session_name="$(echo $CONFIG | jq -r '.tmux.session_name')"
+    export fs_tmux_theme="${app_dir}/scripts/$(echo $CONFIG | jq -r '.tmux.theme')"
+    export fs_character="$(echo $CONFIG | jq -r '.fs.character')"
+    export fs_password="$(echo $CONFIG | jq -r '.fs.password')"
+    export fs_chat_channels="$(echo $CONFIG | jq -r '.fs.chat_channels')"
+fi
+
+export TMUX_CMD="tmux -L tmux_fs_socket -f ${fs_tmux_theme}"
+
+if [[ $(${TMUX_CMD} has-session -t "${fs_tmux_session_name}") ]]; then
+    ${TMUX_CMD} attach-session -t "${fs_tmux_session_name}"
+else
+    ${TMUX_CMD} new-session -A -s "${fs_tmux_session_name}" -d -x ${max_width} -y ${max_height} tt++ ${app_dir}/scripts/main.tin
+    ${TMUX_CMD} list-panes -F "#{pane_pid}" > "${data_dir}/main.pid" # Store the PID of the main tintin session
+    ${app_dir}/scripts/update_status.pl --name "${fs_character}" # For initial setup
+    ${TMUX_CMD} set-option -g aggressive-resize off
+    ${TMUX_CMD} set-option -g set-titles on
+    ${TMUX_CMD} set-option -g set-titles-string '#S'
+    ${TMUX_CMD} split-window -v -l ${chat_height} -b -t 0 tt++ "${app_dir}/scripts/chat_pane.tin"
+    ${TMUX_CMD} split-window -h -l ${map_width} -b -t 1 perl "${app_dir}/scripts/status.pl"
+    ${TMUX_CMD} split-window -v -l ${map_height} -t 1 tt++ "${app_dir}/scripts/map_pane.tin"
+
+    ${TMUX_CMD} select-pane -t 3
+    ${TMUX_CMD} attach-session
+fi

@@ -1,0 +1,97 @@
+# Modified version of:
+#
+# Powerline Double Magenta - Tmux Theme
+# Created by Jim Myhrberg <contact@jimeh.me>.
+#
+# Inspired by vim-powerline: https://github.com/Lokaltog/powerline
+#
+# Requires terminal to be using a powerline compatible font, find one here:
+# https://github.com/Lokaltog/powerline-fonts
+#
+
+# Read in the standard config (if it exists in the default place)
+source-file -q ${HOME}/.tmux.conf
+
+# Status update interval
+set -g status-interval 1
+
+# Basic status bar colors
+set -g status-fg default 
+set -g status-bg default
+
+# Blue status bar
+#status_fg1='colour39'
+#status_fg2='colour32'
+#status_fg3='colour25'
+#status_bg1='colour21'
+#status_bg2='colour19'
+#status_bg3='colour17'
+#
+# Purple status bar
+status_fg1='colour213'
+status_fg2='colour213'
+status_fg3='colour213'
+status_bg1='colour126'
+status_bg2='colour90'
+status_bg3='colour53'
+
+
+# Left side of status bar
+set -g status-left-bg default
+set -g status-left-fg colour243
+set -g status-left-length 75
+set -g status-left "#[fg=${status_fg1},bg=${status_bg1},nobold] #S #[fg=${status_bg1},bg=${status_bg2},nobold]#[fg=${status_fg2},bg=${status_bg2}] ${fs_character} ${fs_sex_symbol} #[fg=${status_bg2},bg=${status_bg3},nobold]#[fg=${status_fg3},bg=${status_bg3}] 🕑 #(TZ='US/Central' date '+%%A %%-I:%%M:%%S%%p %%Z') #[fg=${status_bg3},bg=default,nobold]#[default]"
+
+# Right side of status bar
+set -g status-right-bg default
+set -g status-right-fg colour243
+set -g status-right-length 75
+set -g status-right "#{?client_prefix,#[fg=${status_fg3}]#{prefix}#[fg=default] ,} #[fg=${status_bg3},bg=default]#[fg=${status_fg3},bg=${status_bg3}] %-I:%M:%S%p %Z #[fg=${status_bg2},bg=${status_bg3}]#[fg=${status_fg2},bg=${status_bg2}] %A %d %B %y #[fg=${status_bg1},bg=${status_bg2}]#[fg=${status_fg1},bg=${status_bg1}] #H "
+
+# Window status
+#set -g window-status-format "  #I:#W#F  "
+#set -g window-status-current-format "#[fg=colour129,nobold] #I:#W#F #[fg=colour233,bg=black,nobold]"
+set -g window-status-format ""
+set -g window-status-current-format ""
+
+# Current window status
+set -g window-status-current-bg colour125
+set -g window-status-current-fg colour235
+
+# Window with activity status
+set -g window-status-activity-bg colour245 # fg and bg are flipped here due to
+set -g window-status-activity-fg colour233 # a bug in tmux
+
+# Window separator
+set -g window-status-separator ""
+
+# Window status alignment
+set -g status-justify centre
+
+# Pane border
+set -g pane-border-bg default
+set -g pane-border-fg ${status_bg1}
+
+# Active pane border
+set -g pane-active-border-bg default
+set -g pane-active-border-fg ${status_bg1}
+
+# Pane number indicator
+set -g display-panes-colour colour233
+set -g display-panes-active-colour colour245
+
+# Clock mode
+set -g clock-mode-colour ${status_fg2}
+set -g clock-mode-style 24
+
+# Message
+set -g message-bg colour125
+set -g message-fg black
+
+# Command message
+set -g message-command-bg colour233
+set -g message-command-fg black
+
+# Mode
+set -g mode-bg colour125
+set -g mode-fg colour231

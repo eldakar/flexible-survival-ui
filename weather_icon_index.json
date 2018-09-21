@@ -1,0 +1,58 @@
+{
+	"_comment" : [
+		"Mapping of weather icon names to unicode values.",
+		"",
+		"Default value for a symbol will be used if no day or night symbol",
+		"is defined, the main default at the top of the file will be used",
+		"if no symbol is defined for the weather type at all."
+	],
+	
+	"default" : "f07b",
+	
+	"wind_direction" : {
+		"_comment" : [
+			"Note that the direction in the weather data indicates where",
+			"the wind is coming from, not to. I've allocated arrows that",
+			"point in the direction the wind is *going to* though, not",
+			"from, as it makes more sense to me."
+		],
+		"north"     : "2193",
+		"northeast" : "2199",
+		"east"      : "2190",
+		"southeast" : "2196",
+		"south"     : "2191",
+		"southwest" : "2197",
+		"west"      : "2192",
+		"northwest" : "2198"
+	},
+
+	"clear" : {
+		"default" : "f00d",
+		"day"     : "f00d",
+		"night"   : "f02e"
+	},
+
+	"clouds" : {
+		"default" : "f013",
+		"day"     : "f002",
+		"night"   : "f086"
+	},
+	
+	"haze" : {
+		"default" : "f063",
+		"day"     : "f0b6",
+		"night"   : "f063"
+	},
+	
+	"mist" : {
+		"default" : "f063",
+		"day"     : "f003",
+		"night"   : "f014"
+	},
+	
+	"fog" : {
+		"default" : "f014",
+		"day"     : "f003",
+		"night"   : "f04a"
+	}
+}
