@@ -325,8 +325,8 @@ while (my @events = $change_notifier->wait_for_events()) {
         elsif ($wind_speed <= 3.3)  {$wind_strength = color('ansi245')."A light breeze"        }
         elsif ($wind_speed <= 5.5)  {$wind_strength = color('ansi117')."A gentle breeze"       }
         elsif ($wind_speed <= 7.9)  {$wind_strength = color('ansi121')."A moderate breeze"     }
-        elsif ($wind_speed <= 10.7) {$wind_strength = color('ansi084')."A fresh breeze"        }
-        elsif ($wind_speed <= 13.8) {$wind_strength = color('ansi034')."A strong breeze"       }
+        elsif ($wind_speed <= 10.7) {$wind_strength = color('ansi84'). "A fresh breeze"        }
+        elsif ($wind_speed <= 13.8) {$wind_strength = color('ansi34'). "A strong breeze"       }
         elsif ($wind_speed <= 17.7) {$wind_strength = color('ansi154')."A moderate gale"       }
         elsif ($wind_speed <= 20.7) {$wind_strength = color('ansi136')."A fresh gale"          }
         elsif ($wind_speed <= 24.4) {$wind_strength = color('ansi202')."A severe gale"         }
