@@ -46,7 +46,7 @@ sub read_json_file {
 
 my $name = undef;
 my $sex = undef;
-my $symbol = undef;
+my $sex_symbol = undef;
 my $area = undef;
 my $room = undef;
 my $hazard = undef;
@@ -59,20 +59,23 @@ GetOptions(
     "hazard=s" => \$hazard,
 );
 
-if    ($sex eq 'male')   { $symbol = '♂' }
-elsif ($sex eq 'female') { $symbol = '♀' }
-elsif ($sex eq 'herm')   { $symbol = '⚥' }
-elsif ($sex eq 'neuter') { $symbol = '⚲' }
-else                     { $symbol = '💩' }; # Should be a noticible error condition...
-
 my $status_data;
 # Read in any currently stored data
 if (-r $status_data_file) { $status_data = read_json_file($status_data_file); };
 
+if ($sex) {
+    # Only change the symbol if we're updating sex
+    if    ($sex eq 'male')   { $sex_symbol = '♂' }
+    elsif ($sex eq 'female') { $sex_symbol = '♀' }
+    elsif ($sex eq 'herm')   { $sex_symbol = '⚥' }
+    elsif ($sex eq 'neuter') { $sex_symbol = '⚲' }
+    else                     { $sex_symbol = '💩' }; # Should be a noticible error condition...
+};
+
 # Add any new data supplied
 $status_data->{'character'}->{'name'} = $name if $name;
 $status_data->{'character'}->{'sex'} = $sex if $sex;
-$status_data->{'character'}->{'sex_symbol'} = $symbol if $symbol;
+$status_data->{'character'}->{'sex_symbol'} = $sex_symbol if $sex_symbol;
 $status_data->{'location'}->{'area'} = $area if $area;
 $status_data->{'location'}->{'room'} = $room if $room;
 $status_data->{'location'}->{'hazard'} = $hazard if $hazard;
@@ -82,4 +85,4 @@ print $FILE encode_json($status_data);
 close $FILE;
 
 # Update the tmux environment variable for character sex so the status bar can be updated
-system('${TMUX_CMD} set-environment -g fs_sex '.$symbol);
+system('${TMUX_CMD} set-environment -g fs_sex_symbol '.$sex_symbol.' && ${TMUX_RELOAD}');

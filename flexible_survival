@@ -110,6 +110,13 @@ else
 fi
 
 export TMUX_CMD="tmux -L tmux_fs_socket -f ${fs_tmux_theme}"
+export TMUX_RELOAD="tmux -L tmux_fs_socket source-file ${fs_tmux_theme}"
+
+# Set the character's sex symbol as otherwise it isn't available until the first status update
+if [[ -r ${data_dir}/status.json ]]; then
+    export fs_sex_symbol="$(cat "${data_dir}/status.json" | jq -r '.character.sex_symbol')"
+fi
+
 
 if [[ $(${TMUX_CMD} has-session -t "${fs_tmux_session_name}") ]]; then
     ${TMUX_CMD} attach-session -t "${fs_tmux_session_name}"
