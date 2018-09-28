@@ -203,27 +203,31 @@ action {^\<Flee\> %+ flees to the [%+]} {
 
 #action {~\e[0;37m--\e[0;36mContents of %1\e[0;37m--\e[0m\e[0m} {
 	#regex {%1} {^[${room area}]: ${room name}$} {
-		#NOP {Room description is complete, store and stop reading by removing the grab_room_description flag};
-		#var {grab room description} {false};
+		#if {"${grab room description}" == "true"} {
+			#NOP {Room description is complete, store and stop reading by removing the grab_room_description flag};
+			#var {grab room description} {false};
 
-		#NOP {Remove empty lines from the start and end of the description, and the last line that isn't part of it};
-		#list {room description} delete -1;
-		#while {"${room description}[1]" == "\e[0m%s\e[0m"} { #list {room description} delete 1; };
-		#while {"${room description}[-1]" == "\e[0m%s\e[0m"} { #list {room description} delete -1; };
+			#NOP {Remove empty lines from the start and end of the description, and the last line that isn't part of it};
+			#list {room description} delete -1;
+			#while {"${room description}[1]" == "\e[0m%s\e[0m"} { #list {room description} delete 1; };
+			#while {"${room description}[-1]" == "\e[0m%s\e[0m"} { #list {room description} delete -1; };
 
-		#loop {1} {&{room description}[]} {i} {
-			#if {"${room description}[$i]" == "^%s"} { #list {room description} delete {i}; } { #break; };
-		};
+			#loop {1} {&{room description}[]} {i} {
+				#if {"${room description}[$i]" == "^%s"} { #list {room description} delete {i}; } { #break; };
+			};
 
-		#NOP {Convert the description array into a string};
-		#var {tmp} {${room description}[1]};
-		#loop {2} {&{room description}[]} {i} {
-			#var {tmp} {${tmp}\n${room description}[$i]};
-		};
+			#NOP {Convert the description array into a string};
+			#var {tmp} {${room description}[1]};
+			#loop {2} {&{room description}[]} {i} {
+				#var {tmp} {${tmp}\n${room description}[$i]};
+			};
 
-		#NOP {Store the description and clear the array for the next room};
-		#map set {roomdesc} {$tmp};
-		#list {room description} clear;
+			#NOP {Store the description and clear the array for the next room};
+			#map set {roomdesc} {$tmp};
+			#list {room description} clear;
+		} {
+			#NOP {Haven't entered a new room, this happens when entering combat};
+		}
 	} {
 		#NOP {Comment to stop tintin going crazy};
 	};
