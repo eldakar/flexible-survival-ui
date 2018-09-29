@@ -85,4 +85,4 @@ print $FILE encode_json($status_data);
 close $FILE;
 
 # Update the tmux environment variable for character sex so the status bar can be updated
-system('${TMUX_CMD} set-environment -g fs_sex_symbol '.$sex_symbol.' && ${TMUX_RELOAD}');
+system('${TMUX_CMD} set-environment -g fs_sex_symbol '.$status_data->{'character'}->{'sex_symbol'}.' && ${TMUX_RELOAD}');
