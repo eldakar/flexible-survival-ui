@@ -54,5 +54,11 @@
 		"default" : "f014",
 		"day"     : "f003",
 		"night"   : "f04a"
+	},
+	
+	"rain" : {
+		"default" : "f019",
+		"day"     : "f008",
+		"night"   : "f028"
 	}
 }
