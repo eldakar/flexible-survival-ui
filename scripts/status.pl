@@ -151,7 +151,11 @@ sub read_json_file {
         open my $FILE, "<", $filename or die "Couldn't open file: $!";
         $contents = <$FILE>;
         close $FILE;
-        $contents = decode_json($contents);
+		if ($contents) {
+	        $contents = decode_json($contents);
+		} else {
+			return;
+		};
     };
     return $contents;
 };
@@ -172,7 +176,7 @@ while (my @events = $change_notifier->wait_for_events()) {
     foreach my $event (@events) {
         if ($event->type eq 'modify' || $event->type eq 'create') {
             # Read the data in from the file
-            $status_data = read_json_file($status_data_file);
+            $status_data = read_json_file($status_data_file) or next;
         } elsif ($event->type eq 'delete') {
             # Data was deleted, so use placeholders from below parsing
         } else {
@@ -306,7 +310,7 @@ while (my @events = $change_notifier->wait_for_events()) {
             $sun_riseset = "rise";
             $sun_time = $daylight_hours->start;
             if ($sun_time < $now) {
-                $sun_time = $s->sunrise_datetime($now->clone->add(days=>1));
+                #$sun_time = $s->sunrise_datetime($now->clone->add(days=>1));
             };
             $weather_colour = 'ansi240';
         };
