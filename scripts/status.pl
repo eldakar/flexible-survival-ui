@@ -249,6 +249,10 @@ while (my @events = $change_notifier->wait_for_events()) {
     
     # Read in the weather data (updated by the tintin timer script)
     my $weather = read_json_file($weather_data_file);
+    if ($weather->{'error_message'}) {
+        $error_msg = $weather->{'error_message'};
+        undef $weather;
+    }
 
     # Read in the weather icon mapping
     my $weather_icons;
@@ -260,7 +264,7 @@ while (my @events = $change_notifier->wait_for_events()) {
         $weather_icons = decode_json($weather_icons);
     };
     
-    if ($weather) {
+    if ($weather && !$error_msg) {
         my $temperature = $weather->{'main'}->{'temp'};
         my $humidity = $weather->{'main'}->{'humidity'};
         my $measurement_time = $weather->{'dt'};
@@ -371,6 +375,7 @@ while (my @events = $change_notifier->wait_for_events()) {
             printf "%s% 64s%s", color('ansi196'), $error_msg, color('reset');
         };
     } else {
-        printf "      %sNo weather data available%s", color('ansi196'), color('reset');
+        printf "      %sNo weather data available%s\n", color('ansi196'), color('reset');
+        printf "   %s%s%s", color('ansi196'), $error_msg, color('reset');
     };
 };
