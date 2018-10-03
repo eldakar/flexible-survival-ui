@@ -128,7 +128,7 @@ else
     ${TMUX_CMD} set-option -g set-titles on
     ${TMUX_CMD} set-option -g set-titles-string '#S'
     ${TMUX_CMD} split-window -v -l ${chat_height} -b -t 0 tt++ "${app_dir}/scripts/chat_pane.tin"
-    ${TMUX_CMD} split-window -h -l ${map_width} -b -t 1 perl "${app_dir}/scripts/status.pl"
+    ${TMUX_CMD} split-window -h -l ${map_width} -b -t 1 "perl \"${app_dir}/scripts/status.pl\" 2> \"${data_dir}/status.err\""
     ${TMUX_CMD} split-window -v -l ${map_height} -t 1 tt++ "${app_dir}/scripts/map_pane.tin"
 
     ${TMUX_CMD} select-pane -t 3
