@@ -18,6 +18,9 @@
 
 #CONFIG           {256 COLORS}  {ON}
 #CONFIG           {CHARSET}  {UTF-8}
+#CONFIG           {LOG}  {RAW}
+
+#script {LOG_FILE} {echo "$data_dir/chat.log"}; #var {LOG_FILE} {$LOG_FILE[1]};
 
 
 #event {SESSION DISCONNECTED} {
@@ -30,6 +33,8 @@
 		#port zap {%0};
 	}
 	#system {tput clear}
+	#script {create log file} {#system {touch $LOG_FILE}};
+	#log overwrite ${LOG_FILE};
 }
 
 #action {^+++EXIT+++$} {
