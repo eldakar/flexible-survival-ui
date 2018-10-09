@@ -1,0 +1,6 @@
+#!/bin/bash
+
+app_dir="/home/richard/programming/flexible_survival/ui"
+data_dir="${app_dir}/character_data"
+config_file="${app_dir}/config.json"
+TMUX_CMD="tmux -L tmux_fs_socket -f ${data_dir}/tmux_theme"
