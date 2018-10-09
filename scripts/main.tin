@@ -196,19 +196,19 @@ action {^\<Flee\> %+ flees to the [%+]} {
 	#showme \n\n\n;
 	#var {room name} {%2};
 	#var {room area} {%1};
-	#var {grab room description} {true};
-	
+
 	#NOP {Only update the map data if we actually went through a valid exit.};
 	#NOP {Otherwise we'd end up overwriting room descriptions when moving with a command that isn't a known PATHDIR.};
 	#if {"${just used a valid exit}" == "true"} {
 		#var {just used a valid exit} {false};
+		#var {grab room description} {true};
 
 		#map set {roomarea} {${room area}};
 		#map set {roomname} {${room name}};
-	};
-	
-	#NOP {Update the UI};
-	#system {perl "$app_dir/scripts/update_status.pl" --area "${room area}" --room "${room name}"};
+
+        #NOP {Update the UI};
+        #system {perl "$app_dir/scripts/update_status.pl" --area "${room area}" --room "${room name}"};
+    } { #NOP {Comment to stop tintin going crazy}; };
 };
 
 #action {~\e[0;37m--\e[0;36mContents of %1\e[0;37m--\e[0m\e[0m} {
@@ -227,10 +227,12 @@ action {^\<Flee\> %+ flees to the [%+]} {
 			};
 
 			#NOP {Convert the description array into a string};
-			#var {tmp} {${room description}[1]};
-			#loop {2} {&{room description}[]} {i} {
-				#var {tmp} {${tmp}\n${room description}[$i]};
-			};
+			#var {tmp} {${room description}[$i]};
+			#if {&{room description}[] > 1} {
+				#loop {2} {&{room description}[]} {i} {
+					#var {tmp} {${tmp}\n${room description}[$i]};
+				};
+			} { #NOP {Comment to stop tintin going crazy}; };
 
 			#NOP {Store the description and clear the array for the next room};
 			#map set {roomdesc} {$tmp};
@@ -265,7 +267,7 @@ action {^\<Flee\> %+ flees to the [%+]} {
 	};
 
 	#NOP {Catch some common navigation errors and remove them from the map};
-	#regex {${received line}} {^{You can't go that way.|You can't go that way from here.|Please try again.|The door seems locked.}} {
+	#regex {${received line}} {^{You can't go that way.|You can't go that way from here.|Please try again.|The door seems locked.|Access failed!}} {
 		#map undo;
 		update_map;
 	};
