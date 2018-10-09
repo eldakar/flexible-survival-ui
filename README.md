@@ -54,7 +54,7 @@ Also, these scripts were designed for a linux system. They may work on other ope
 ## Installation
 
 Download the scripts using:  
-`git clone git@gitlab.com:inutt/flexible-survival-ui.git ~/fs_mud`  
+`git clone https://gitlab.com/inutt/flexible-survival-ui.git ~/fs_mud`  
 or similar - feel free to change `~/fs_mud` to whatever directory you want to store the scripts in.
 
 Create the config file using:  
