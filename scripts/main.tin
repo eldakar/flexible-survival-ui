@@ -152,34 +152,43 @@
 
 
 #NOP {Intercept chat messages and redirect to a separate pane};
-#alias {process_chat_message} {
-	#var {full message} {%1};
-	#var {last incoming chat channel} {%2};
-	#var {last incoming chat message} {%3};
+#action {~^{\e\[.+?m}[{\e\[.+?m\e\[.+?m|\e\[.+?m}%+{\e\[.+?m}]{\e\[.+?m} %+} {
+	#NOP {process_chat_message {%0} {%3} {%6}};
+	#var {line} {%0};
+	#NOP { Escape things for passing to the shell };
+	#replace {line} {"} {\"};
+	#replace {line} {'} {\'};
+	#replace {line} {&} {\&};
+	#replace {line} {#} {\#};
+	#replace {line} {!} {\!};
+	#replace {line} {?} {\?};
+	#replace {line} {(} {\(};
+	#replace {line} {)} {\)};
+	#replace {line} {<} {\<};
+	#replace {line} {>} {\>};
+	#replace {line} {~} {\~};
 
-	#foreach {${chat channel list}[%*]} {tmp} {
-		#if {"${last incoming chat channel}" == "${tmp}"} {
-			#chat_pane #line sub {var} #send {${full message}\};
-			#line gag;
-			#break;
-		};
-	};
+	#NOP { Find out whether this line really is a chat message,  };
+	#NOP { and if we should redirect it to the chat pane.        };
+	#NOP { This is delegated to perl, as tintin's regex handling };
+	#NOP { doesn't seem quite up to the job. At least, not in    };
+	#NOP { the way I was attempting to do it.                    };
+	#script {line_is_chat} {perl "$app_dir/scripts/identify_chat.pl" $line};
+	#var {line_is_chat} {$line_is_chat[1]};
+	#if {"$line_is_chat" != ""} {
+		#chat_pane #line sub {var} #send {%0\};
+		#line gag;
+		#break;
+	} { #NOP {comment}; };
 };
-#NOP #action {~\e[1;37m[\e[{\w+}{.+}\e[{\w+}m]\e[0m {.+}} ;
-#NOP 	#showme "Got chat message for channel %1";
-#NOP 	#showme "Message reads: %2";
-#NOP	process_chat_message {%0} {%1} {%2};
-#NOP };
-#NOP #action {~^\e[1;37m[\e%+m%1\e%+m]\e[0m %2} {
-#action {~^\e[1;37m[\e%*m%1\e%*m]\e[0m %2} {
-	process_chat_message {%0} {%1} {%2};
-};
-#NOP #action {~^\e[1;37m[\e%+m\e%+m%1\e%+m]\e[0m %2} {
-#NOP process_chat_message {%0} {%1} {%2};
-#NOP };
 
-action {^\<Flee\> %+ flees to the [%+]} {
-	#showme "+++ DEBUG: %1 fleeing successful to %2 +++";
+
+#NOP {Highlight the rp log (command 'pot') header for easier reading of text and metadata};
+#substitute {^%d {second |seconds|minute |minutes|hour   |hours  } > %+} {\e[38\;5\;129m%1 %2 |\e[0m %3};
+
+
+#action {^<Flee> %+ flees to the [%+] %+} {
+	#showme "+++ Inutt's Debug: You just escaped combat in the direction '%2'. Please manually correct your map location.";
 };
 
 
