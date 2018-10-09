@@ -50,5 +50,3 @@ $input =~ s/$colour_code//g;
 my @vars = ($input =~ /^\[(.+?)\]/);
 my $channel = $vars[0];
 if ($channel && (grep /$channel/, @channels)) { say $channel } else { say "" };
-say $input;
-use Data::Dumper;print Dumper \@vars;
