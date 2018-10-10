@@ -26,6 +26,7 @@ export app_name='fs_mud' # Keep this consistent between scripts
 export app_dir="$(dirname "$(realpath $0)")"
 export config_file="${app_dir}/config.json"
 export data_dir="${app_dir}/character_data"
+export PERL5LIB="${app_dir}/local/lib/perl5"
 
 # Max height is lines-1 as one line is reserved for the status bar
 max_width=$(tput cols)             #       chat
