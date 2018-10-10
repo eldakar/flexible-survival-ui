@@ -167,6 +167,7 @@
 	#replace {line} {<} {\<};
 	#replace {line} {>} {\>};
 	#replace {line} {~} {\~};
+	#replace {line} {|} {\|};
 
 	#NOP { Find out whether this line really is a chat message,  };
 	#NOP { and if we should redirect it to the chat pane.        };
