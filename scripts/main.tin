@@ -185,7 +185,7 @@
 
 
 #NOP {Highlight the rp log (command 'pot') header for easier reading of text and metadata};
-#substitute {^%d {second |seconds|minute |minutes|hour   |hours  } > %+} {\e[38\;5\;129m%1 %2 |\e[0m %3};
+#substitute {^%d {second|seconds|minute|minutes|hour|hours} %s> %+} {\e[38\;5\;129m%1 %2 %3|\e[0m %4};
 
 
 #action {^<Flee> %+ flees to the [%+] %+} {
