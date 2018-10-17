@@ -113,7 +113,8 @@
 		#case {"safe"} { #var {colour} {<afa>} };
 		#case {"normal"} { #var {colour} {} };
 		#case {"dangerous"} { #var {colour} {<faa>} };
-		#default { #showme {Can't mark as "%2", only safe|normal|dangerous; #return } };
+		#case {"residence"} { #var {colour} {<bbf>} };
+		#default { #showme {Can't mark as "%2", only safe|normal|dangerous|residence; #return } };
 	};
 	#showme {Marked this location as %2};
 	#map set roomcolor {$colour};
@@ -185,7 +186,7 @@
 
 
 #NOP {Highlight the rp log (command 'pot') header for easier reading of text and metadata};
-#substitute {^%d {second|seconds|minute|minutes|hour|hours} %s> %+} {\e[38\;5\;129m%1 %2 %3|\e[0m %4};
+#substitute {^%d {second|seconds|minute|minutes|hour|hours|day|days} %s> %+} {\e[38\;5\;129m%1 %2 %3|\e[0m %4};
 
 
 #action {^<Flee> %+ flees to the [%+] %+} {
