@@ -108,15 +108,15 @@
 };
 
 
-#alias {mark here} {
-	#switch {"%2"} {
+#alias {mark here as} {
+	#switch {"%3"} {
 		#case {"safe"} { #var {colour} {<afa>} };
 		#case {"normal"} { #var {colour} {} };
 		#case {"dangerous"} { #var {colour} {<faa>} };
 		#case {"residence"} { #var {colour} {<bbf>} };
-		#default { #showme {Can't mark as "%2", only safe|normal|dangerous|residence; #return } };
+		#default { #showme {Can't mark as "%3", only safe|normal|dangerous|residence; #return } };
 	};
-	#showme {Marked this location as %2};
+	#showme {Marked this location as %3};
 	#map set roomcolor {$colour};
 };
 
