@@ -120,6 +120,11 @@
 	#map set roomcolor {$colour};
 };
 
+#alias {pjoin %1} {
+	#showme {<FAA><aaa>+++<099>                   <faa>STOP TYPING THAT!<099>                    <FAA><aaa>+++<099>};
+	#showme {<FAA><aaa>+++<099> <ffa>Use the verbatim character to really send that command<099> <FAA><aaa>+++<099>};
+};
+
 
 #event {SESSION CONNECTED} {
 	#if {"%0" == "main_session"} {
